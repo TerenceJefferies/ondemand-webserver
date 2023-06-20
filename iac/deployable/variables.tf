@@ -13,7 +13,7 @@ variable "ami" {
 }
 
 variable "definitions" {
-  type = list(object({
+  type = map(object({
     alias = string,
     reference = string
   }))

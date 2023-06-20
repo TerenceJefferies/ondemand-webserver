@@ -1,24 +1,23 @@
 const fs = require('fs');
 
-if (!process.argv[2]) {
-  console.error('You must provide at least one feature reference');
-  process.exit(1);
-}
-
 const makeServerDefinition = (reference, alias) => ({
   alias,
   reference,
 });
 
-const serversAlwaysAvailable = [
-  makeServerDefinition('main', 'production'),
-  makeServerDefinition('qa', 'qa'),
-];
+const serversAlwaysAvailable = {
+  production: makeServerDefinition('main', 'production'),
+  qa: makeServerDefinition('qa', 'qa'),
+};
 
-const featureReferences = process.argv[2].split(',');
+const featureReferences = (process.argv[2]) ? process.argv[2].split(',') : [];
 
-const serversForFeatures = featureReferences.map((reference) => makeServerDefinition(reference, reference));
+const serversForFeatures = {};
 
-const servers = [...serversAlwaysAvailable, ...serversForFeatures];
+featureReferences.forEach((featureReference) => {
+  serversForFeatures[featureReference] = makeServerDefinition(featureReference, featureReference);
+});
+
+const servers = {...serversAlwaysAvailable, ...serversForFeatures};
 
 fs.writeFileSync('servers.json', JSON.stringify(servers));

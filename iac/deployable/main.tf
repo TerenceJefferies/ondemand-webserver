@@ -7,18 +7,18 @@ data "aws_vpc" "default" {
 }
 
 resource "aws_instance" "web" {
+  for_each = var.definitions
   ami                    = var.ami
   instance_type          = var.instance_type
   user_data              = templatefile("${path.module}/userdata.tftpl", {
     nginx_config = base64encode(file("${path.module}/nginx.conf")),
-    deployment_alias = var.definitions[count.index].alias,
-    deployment_reference = var.definitions[count.index].reference
+    deployment_alias = each.value.alias,
+    deployment_reference = each.value.reference
   })
   vpc_security_group_ids = [aws_security_group.web.id]
-  count = length(var.definitions)
 
   tags = {
-    Name = var.definitions[count.index].alias
+    Name = each.value.alias
   }
 }
 

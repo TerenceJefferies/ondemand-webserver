@@ -5,7 +5,7 @@ yum update -y && yum install -y nginx php8.1-fpm php-mbstring php-xml php-bcmath
 git clone https://github.com/TerenceJefferies/ondemand-webserver.git /tmp/application
 cd /tmp/application
 git checkout "${deployment_reference}"
-cp -r /tmp/application/app /var/www/html
+cp -rT /tmp/application/app /var/www/html
 cd /var/www/html
 rm -rf /tmp/application
 mkdir /opt/composer
@@ -16,7 +16,7 @@ php composer-setup.php
 php -r "unlink('composer-setup.php');"
 php composer.phar install
 cp .env.example .env
-echo "${deployment_alias}" >> .env
+echo "DEPLOYMENT_ALIAS=${deployment_alias}" >> .env
 php artisan key:generate
 chown -R apache:apache /var/www/html/storage
 
