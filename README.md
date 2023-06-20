@@ -34,6 +34,7 @@ that outputs the alias for the deployment, giving us an easy way to test this se
 ```
 
 alias = name of server
+
 reference = branch/tag/commit to checkout
 
 ## Example Usage
