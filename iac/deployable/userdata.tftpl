@@ -1,0 +1,26 @@
+#!/bin/bash
+
+yum update -y && yum install -y nginx php8.1-fpm php-mbstring php-xml php-bcmath git php-cli zip unzip
+
+git clone https://github.com/TerenceJefferies/ondemand-webserver.git /tmp/application
+cd /tmp/application
+git checkout "${deployment_reference}"
+cp -r /tmp/application/app /var/www/html
+cd /var/www/html
+rm -rf /tmp/application
+mkdir /opt/composer
+export COMPOSER_HOME=/opt/composer
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
+php composer.phar install
+cp .env.example .env
+echo "${deployment_alias}" >> .env
+php artisan key:generate
+chown -R apache:apache /var/www/html/storage
+
+echo "${nginx_config}" | base64 --decode > /etc/nginx/nginx.conf
+
+service php-fpm start
+service nginx start
